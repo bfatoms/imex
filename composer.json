@@ -20,7 +20,7 @@
     "require": {
         "php": ">=5.4.0",
         "illuminate/support": "5.*",
-        "bfatoms/typecons": "^1.0.0"
+        "bfatoms/typecons": "^v1.0.0"
     },
     "autoload": {
         "psr-4": { "BfAtoms\\Imex\\": "src/" }
