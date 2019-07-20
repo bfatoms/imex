@@ -1,0 +1,28 @@
+{
+    "name": "bfatoms/imex",
+    "description": "a laravel package for importing and exporting data",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomas Foronda",
+            "email": "bfatoms69@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BfAtoms\\Imex\\ImexServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "5.*",
+        "bfatoms/typecons": "dev"
+    },
+    "autoload": {
+        "psr-4": { "BfAtoms\\Imex\\": "src/" }
+    }
+}
