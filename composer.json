@@ -18,7 +18,7 @@
         }
     },
     "require": {
-        "bfatoms/typecons": "^1.0"
+        "bfatoms/typecon": "^1.0"
     },
     "autoload": {
         "psr-4": { "BfAtoms\\Imex\\": "src/" }
