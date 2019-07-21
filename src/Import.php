@@ -68,7 +68,6 @@ class Import {
                 if(request('find'))
                 {
                     $find_this = collect($data)->only($find)->toArray();
-
                 }
 
                 $model_data = $this->model::updateOrCreate(
@@ -81,7 +80,7 @@ class Import {
             }
             catch(\Exception $ex)
             {
-                $errors[] = $ex->getMessage();
+                $errors[] = json_encode($data)." ".$ex->getMessage();
             }
 
         }
@@ -100,8 +99,10 @@ class Import {
         if(request('column'))
         {
             foreach(request('column') as $key => $col){
+                dd($key);
                 $model = 'App\Models\\'.$col['model'];                
                 $uniques = array_unique(array_column($data, $key));
+                dd($uniques);
                 foreach($uniques as $unique)
                 {
                     try
@@ -119,7 +120,6 @@ class Import {
                     {
                         continue;
                     }
-                    
 
                 }
             }
