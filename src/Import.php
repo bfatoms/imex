@@ -44,6 +44,11 @@ class Import {
         $csv->setConversionKey('join', ".");
         $converts = array_filter(json_decode($csv->convert(), true));
 
+        return $this->import($converts);
+    }
+
+    public function import(array $converts)
+    {
         $converts = $this->findRelatedData($converts);
 
         $updates = [];
@@ -82,14 +87,6 @@ class Import {
         }
 
         return ["updated" => $updates, "errors" => $errors];
-    }
-
-    public function import()
-    {
-        $result = [];
-
-        $this->result = $result;
-        return $this->result;
     }
 
     public function getResult()
