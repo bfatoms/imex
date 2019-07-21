@@ -67,15 +67,26 @@ class Import {
             {
                 if(request('find'))
                 {
-                    $find_this = collect($data)->only($find)->toArray();
+                    if (count(array_intersect_key(array_flip($find), $data)) === count($find)) {
+                        // All required keys exist!
+                        $find_this = collect($data)->only($find)->toArray();
+                        $model_data = $this->model::updateOrCreate(
+                            $find_this,
+                            $data
+                        );
+                        $updates[] = $model_data;   
+                    }else{
+                        $errors[] = "Not Found: ". json_encode($data);
+                    }
                 }
 
-                $model_data = $this->model::updateOrCreate(
-                    $find_this,
-                    $data
-                );
-
-                $updates[] = $model_data;
+                if(!request('find'))
+                {
+                    $model_data = $this->model::create(
+                        $data
+                    );
+                    $updates[] = $model_data;    
+                }
 
             }
             catch(\Exception $ex)
@@ -100,13 +111,16 @@ class Import {
         {
             foreach(request('column') as $key => $col){
                 $model = $this->getModel($col['model']);
+
                 $uniques = array_unique(array_column($data, $key));
+
                 foreach($uniques as $unique)
                 {
                     try
                     {
                         $find = str_replace("file_data", $unique, $col['find']);
-                        $model_data = $model::withoutGlobalScopes()->where($find)->select($col['return'])->first();
+                        $model_data = $model::withoutGlobalScopes()->where($find)->first();
+
                         $data = array_map(function($item) use($unique, $key, $model_data, $col){
                             if($item[$key] == $unique){
                                 $item[$col['field']] = $model_data->{$col['return']};
