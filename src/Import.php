@@ -31,7 +31,7 @@ class Import {
         if(is_string($model)){
             $model = Str::studly(Str::singular(request('model')));
             $this->model_name = $model;
-            $model = config('imex.model_path') ?? "App\\Models" .'\\'.$model ?? "App".'\\'.$model;
+            $model = $this->getModel($model);
         }
         $this->model = $model;
     }
@@ -99,10 +99,8 @@ class Import {
         if(request('column'))
         {
             foreach(request('column') as $key => $col){
-                dd($key);
-                $model = 'App\Models\\'.$col['model'];                
+                $model = $this->getModel($col['model']);
                 $uniques = array_unique(array_column($data, $key));
-                dd($uniques);
                 foreach($uniques as $unique)
                 {
                     try
@@ -125,6 +123,11 @@ class Import {
             }
         }
         return $data;
+    }
+
+    public function getModel($model)
+    {
+        return  config('imex.model_path') ?? "App\Models" .'\\'.$model ?? "App".'\\'.$model;
     }
 
 }
