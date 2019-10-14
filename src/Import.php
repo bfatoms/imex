@@ -141,7 +141,7 @@ class Import {
 
     public function getModel($model)
     {
-        return  config('imex.model_path') ?? "App\Models" .'\\'.$model ?? "App".'\\'.$model;
+        return  (config('imex.model_path') ?? "App\Models") .'\\'.$model ?? "App".'\\'.$model;
     }
 
 }

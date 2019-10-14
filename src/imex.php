@@ -8,5 +8,6 @@ return [
     "import-controller" => "BfAtoms\Imex\ImexController@import",
     "export-controller" => "BfAtoms\Imex\ImexController@export",
     "import_request_name" => "file",
-    "export_request_name" => "file"
+    "export_request_name" => "file",
+    "middleware" => "jwt.auth"
 ];
