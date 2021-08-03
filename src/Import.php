@@ -7,8 +7,8 @@ use Illuminate\Support\Str;
 use BfAtoms\Imex\ImportRequest;
 use BfAtoms\Typecon\CsvToJson;
 
-class Import {
-
+class Import
+{
     protected $filepath = "";
     protected $model = "";
     protected $model_name = "";
@@ -28,7 +28,7 @@ class Import {
   
     public function model($model)
     {
-        if(is_string($model)){
+        if (is_string($model)) {
             $model = Str::studly(Str::singular(request('model')));
             $this->model_name = $model;
             $model = $this->getModel($model);
@@ -51,52 +51,51 @@ class Import {
     {
         $converts = $this->findRelatedData($converts);
 
-        $updates = [];
+        $created = [];
+        $updated = [];
         $errors = [];
         $find = [];
 
-        if(request('find'))
-        {
+        if (request('find')) {
             $find = explode(',', request('find'));
-
         }
 
-        foreach($converts as $data)
-        {
-            try
-            {
-                if(request('find'))
-                {
+        foreach ($converts as $data) {
+            try {
+                if (request('find')) {
                     if (count(array_intersect_key(array_flip($find), $data)) === count($find)) {
                         // All required keys exist!
                         $find_this = collect($data)->only($find)->toArray();
-                        $model_data = $this->model::updateOrCreate(
-                            $find_this,
-                            $data
-                        );
-                        $updates[] = $model_data;   
-                    }else{
+                        $model_data = $this->model::where($find_this)->first();
+
+                        if (empty($model_data)) {
+                            $created_data = $this->model::create($data);
+                            $created[] = $created_data;
+                        } else {
+                            $model_data->update($data);
+                            $updated[] = $model_data;
+                        }
+                    } else {
                         $errors[] = "Not Found: ". json_encode($data);
                     }
                 }
 
-                if(!request('find'))
-                {
+                if (!request('find')) {
                     $model_data = $this->model::create(
                         $data
                     );
-                    $updates[] = $model_data;    
+                    $created[] = $model_data;
                 }
-
-            }
-            catch(\Exception $ex)
-            {
+            } catch (\Exception $ex) {
                 $errors[] = json_encode($data)." ".$ex->getMessage();
             }
-
         }
 
-        return ["updated" => $updates, "errors" => $errors];
+        return [
+            "created" => $created,
+            "updated" => $updated,
+            "errors" => $errors
+        ];
     }
 
     public function getResult()
@@ -107,32 +106,26 @@ class Import {
 
     public function findRelatedData($data)
     {
-        if(request('column'))
-        {
-            foreach(request('column') as $key => $col){
+        if (request('column')) {
+            foreach (request('column') as $key => $col) {
                 $model = $this->getModel($col['model']);
 
                 $uniques = array_unique(array_column($data, $key));
 
-                foreach($uniques as $unique)
-                {
-                    try
-                    {
+                foreach ($uniques as $unique) {
+                    try {
                         $find = str_replace("file_data", $unique, $col['find']);
                         $model_data = $model::withoutGlobalScopes()->where($find)->first();
 
-                        $data = array_map(function($item) use($unique, $key, $model_data, $col){
-                            if($item[$key] == $unique){
+                        $data = array_map(function ($item) use ($unique, $key, $model_data, $col) {
+                            if ($item[$key] == $unique) {
                                 $item[$col['field']] = $model_data->{$col['return']};
                             }
                             return $item;
                         }, $data);
-                    }
-                    catch(\Exception $ex)
-                    {
+                    } catch (\Exception $ex) {
                         continue;
                     }
-
                 }
             }
         }
@@ -141,7 +134,6 @@ class Import {
 
     public function getModel($model)
     {
-        return  (config('imex.model_path') ?? "App\Models") .'\\'.$model ?? "App".'\\'.$model;
+        return (config('imex.model_path') ?? "App\Models") .'\\'.$model ?? "App".'\\'.$model;
     }
-
 }
